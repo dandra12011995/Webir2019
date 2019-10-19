@@ -37,10 +37,49 @@ namespace Web_Recomendaciones.Controllers
             {
                 // The following requests retrieves all of the user's repositories and
                 // requires that the user be logged in to work.
-                var repositories = await client.Repository.GetAllForCurrent();
-                var contributors = client.Repository.GetAllContributors("lidonadini", "pruebaProyecto");
+                var myRepos = await client.Repository.GetAllForCurrent();
+                Dictionary<String, Repository> reposDict = new Dictionary<string, Repository>();
+                foreach (Repository repository in myRepos)
+                {
+                    if (!reposDict.ContainsKey(repository.FullName))
+                    {
+                        reposDict.Add(repository.FullName, repository);
+                    }
+                }
+
+                var starredRepos = (await client.Activity.Starring.GetAllForCurrent());
+                foreach (Repository repository in starredRepos)
+                {
+                    if (!reposDict.ContainsKey(repository.FullName))
+                    {
+                        reposDict.Add(repository.FullName, repository);
+                    }
+                }
+
+                List<Repository> contributorsRepos = new List<Repository>();
+                Dictionary<String, int> contributors = new Dictionary<string, int>();
+                List<RepositoryContributor> users = new List<RepositoryContributor>();
+                foreach (Repository repos in reposDict.Values)
+                {
+                    users.AddRange(await client.Repository.GetAllContributors(repos.Owner.Login, repos.Name));
+                    foreach(RepositoryContributor c in users)
+                    {
+                        if (!contributors.ContainsKey(c.Login))
+                        {
+                            contributors.Add(c.Login, 1);
+                        }
+                        else
+                        {
+                            contributors[c.Login] += 1;
+                        }
+                    }
+                }
+
+
+
+                //var contributors = client.Repository.GetAllContributors("lidonadini", "pruebaProyecto");
                 //var a = client.Activity.
-                string rc = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().ReposUrl;
+                //string rc = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().ReposUrl;
                 /*string rc1 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().AvatarUrl;
                 int rc2 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().Contributions;
                 string rc3 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().EventsUrl;
@@ -57,7 +96,7 @@ namespace Web_Recomendaciones.Controllers
                 string rc14 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().SubscriptionsUrl;
                 string rc15 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().Url;*/
                 //List<RepositoryContributor> rc = contributors.Result.ToList();
-                var model = new IndexViewModel(repositories);
+                var model = new IndexViewModel(reposDict.Values);
 
                 return View(model);
             }
