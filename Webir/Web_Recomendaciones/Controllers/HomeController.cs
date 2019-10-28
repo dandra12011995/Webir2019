@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using Web_Recomendaciones.ViewModel;
+using static Web_Recomendaciones.ViewModel.Constantes;
 
 namespace Web_Recomendaciones.Controllers
 {
@@ -74,7 +75,7 @@ namespace Web_Recomendaciones.Controllers
                         }
                     }
                 }
-
+                Session[VARIABLES_SESSION.LINKS] = reposDict;
 
 
                 //var contributors = client.Repository.GetAllContributors("lidonadini", "pruebaProyecto");
@@ -138,6 +139,30 @@ namespace Web_Recomendaciones.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        public ActionResult PublicarLinks(TablaRequestViewModel valor)
+        {
+            List<TablaRecomendacionesViewModel> registros = new List<TablaRecomendacionesViewModel>();
+            Dictionary<String, Repository> valores = new Dictionary<string, Repository>();
+            if (Session[VARIABLES_SESSION.LINKS] != null)
+            {
+                valores = (Dictionary<String, Repository>)Session[VARIABLES_SESSION.LINKS];
+                foreach (KeyValuePair<String, Repository> r in valores)
+                {
+                    TablaRecomendacionesViewModel l = new TablaRecomendacionesViewModel();
+                    l.link = r.Value.FullName;
+                    registros.Add(l);
+                }
+                registros.Skip(valor.start).Take(valor.length).ToList();
+            }
+            return Json(new
+            {
+                draw = valor.draw,
+                recordsTotal = registros.Count,
+                recordsFiltered = registros.Count,
+                data = registros
+            }, JsonRequestBehavior.AllowGet);
         }
     }
 }

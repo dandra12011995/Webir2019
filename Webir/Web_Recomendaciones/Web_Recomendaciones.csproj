@@ -69,8 +69,9 @@
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Mvc">
-      <HintPath>..\..\..\..\..\Desktop\VisualPackages\System.Web.Mvc.dll</HintPath>
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
@@ -106,6 +107,33 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\js\adminlte.js" />
+    <Content Include="Content\js\adminlte.min.js" />
+    <Content Include="Content\js\botones_grilla\jszip.min.js" />
+    <Content Include="Content\js\botones_grilla\vfs_fonts.js" />
+    <Content Include="Content\js\buttons.bootstrap.min.js" />
+    <Content Include="Content\js\buttons.html5.min.js" />
+    <Content Include="Content\js\dataTables.bootstrap.min.js" />
+    <Content Include="Content\js\dataTables.buttons.min.js" />
+    <Content Include="Content\js\datatables.min.js" />
+    <Content Include="Content\js\dataTables.responsive.min.js" />
+    <Content Include="Content\js\dataTables.select.min.js" />
+    <Content Include="Content\js\jquery-migrate-3.0.0.js" />
+    <Content Include="Content\js\jquery.dataTables.min.js" />
+    <Content Include="Content\js\jquery.mask.js" />
+    <Content Include="Content\js\jquery.mask.min.js" />
+    <Content Include="Content\js\jquery.slimscroll.min.js" />
+    <Content Include="Content\js\jquery.sparkline.min.js" />
+    <Content Include="Content\js\jquery.spzoom.js" />
+    <Content Include="Content\js\jquery.validate.min.js" />
+    <Content Include="Content\js\js-image-slider.js" />
+    <Content Include="Content\js\jszip.min.js" />
+    <Content Include="Content\js\moment-with-locales.min.js" />
+    <Content Include="Content\js\select2.min.js" />
+    <Content Include="Content\js\video.js" />
+    <Content Include="Content\js\videojs-ie8.min.js" />
+    <Content Include="Content\js\waitingFor.js" />
+    <Content Include="Content\js\wheelzoom.js" />
     <Content Include="Content\Site.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -132,7 +160,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModel\Constantes.cs" />
     <Compile Include="ViewModel\IndexViewModel.cs" />
+    <Compile Include="ViewModel\TablaRecomendacionesViewModel.cs" />
+    <Compile Include="ViewModel\TablaRequestViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

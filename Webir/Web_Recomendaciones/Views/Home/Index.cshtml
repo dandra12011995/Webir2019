@@ -1,14 +1,92 @@
 ﻿@model Web_Recomendaciones.ViewModel.IndexViewModel
-
 @{
     ViewBag.Title = "Repositorios";
 }
 
+<script src="~/Content/js/jquery.dataTables.min.js"></script>
 <div>
-    <h1>My Repositories</h1>
+    <h1>Recomendaciones de repositorios</h1>
     <ul>
-        @foreach (var repository in Model.Repositories) {
+        @foreach (var repository in Model.Repositories)
+        {
             <li><a href="@repository.HtmlUrl">@repository.FullName</a></li>
         }
     </ul>
 </div>
+
+<div class="panel panel-default" style="margin-top: 0px;margin-bottom: 20px;">
+    <div class="panel-body" style="padding-bottom: 20px;padding-top: 20px;">
+        <div class="container">
+            <div class="form-group row" style="margin-bottom: 0px;">
+                <div class="col-xs-10">
+                    <table id="dtDatos" class="table table-striped table-bordered dt-responsive table-hover" cellspacing="0" width="100">
+                        <thead>
+                            <tr class="marcado">
+                                <th style="padding-top: 0px;padding-bottom: 0px;">
+                                    Recomendaciones
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dialog-error" title="Error" style="display:none;">
+    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:10px 10px 20px 0;"></span><div id="textoDialogo"></div></p>
+</div>
+
+<script>
+
+    $('#dtDatos').DataTable({
+        stateSave: true,
+        stateDuration: -1,
+        serverSide: false,
+        select: true,
+        "autoWidth": false,
+        "paging": true,
+        "searching": false,
+        "pagingType": "full_numbers",
+        "lengthChange": false,
+        "ordering": false,
+        "pageLength": 15,
+        "processing": true,
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json",
+            select: {
+                rows: {
+                    _: "",
+                    0: "",
+                    1: ""
+                }
+            }
+        },
+        serverSide: true,
+        ajax: {
+            url: '@Url.Action("PublicarLinks", "Home")',
+            type: 'POST',
+            datatype: 'json',
+        },
+        "columns": [
+            { "data": "link" },
+        ]
+    });
+    
+    $('#dtDatos').on('draw.dt', function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+
+    $("#dialog-error").dialog({
+        resizable: false,
+        width: 500,
+        modal: true,
+        autoOpen: false,
+        buttons: {
+            "Cerrar": function () {
+                $(this).dialog("close");
+            }
+        }
+    });
+</script>
