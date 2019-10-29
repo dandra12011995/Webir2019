@@ -6,24 +6,20 @@
 <script src="~/Content/js/jquery.dataTables.min.js"></script>
 <div>
     <h1>Recomendaciones de repositorios</h1>
-    <ul>
-        @foreach (var repository in Model.Repositories)
-        {
-            <li><a href="@repository.HtmlUrl">@repository.FullName</a></li>
-        }
-    </ul>
 </div>
 
 <div class="panel panel-default" style="margin-top: 0px;margin-bottom: 20px;">
     <div class="panel-body" style="padding-bottom: 20px;padding-top: 20px;">
         <div class="container">
             <div class="form-group row" style="margin-bottom: 0px;">
-                <div class="col-xs-10">
+                <div class="col-xs-12">
                     <table id="dtDatos" class="table table-striped table-bordered dt-responsive table-hover" cellspacing="0" width="100">
                         <thead>
                             <tr class="marcado">
-                                <th style="padding-top: 0px;padding-bottom: 0px;">
+                                <th style="padding-top: 10px;padding-bottom: 10px;">
                                     Recomendaciones
+                                </th>
+                                <th width="10px">
                                 </th>
                             </tr>
                         </thead>
@@ -70,7 +66,15 @@
             datatype: 'json',
         },
         "columns": [
-            { "data": "link" },
+            {
+                "data": "link"
+            },
+            {
+                "data": "url",
+                 render: function (data, type, row) {
+                     return '<a title="Ver" href="' + data + '"><span class="glyphicon glyphicon-log-in"></span></a>';
+                    }
+            },
         ]
     });
     
