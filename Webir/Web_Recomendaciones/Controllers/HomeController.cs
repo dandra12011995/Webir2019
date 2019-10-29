@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using Web_Recomendaciones.ViewModel;
+using Web_Recomendaciones.Content;
 using static Web_Recomendaciones.ViewModel.Constantes;
 
 namespace Web_Recomendaciones.Controllers
@@ -18,7 +19,9 @@ namespace Web_Recomendaciones.Controllers
         const string clientId = "6247094934e496486081";
         private const string clientSecret = "59f1ddfb05ac46f00a72df8839998871ef90bae2";
         readonly GitHubClient client =
-            new GitHubClient(new ProductHeaderValue("Haack-GitHub-Oauth-Demo"));
+            new GitHubClient(new ProductHeaderValue("GitHub RepoReco"));
+
+        private const int MAX_SIMILAR_USERS = 10;
 
         // This URL uses the GitHub API to get a list of the current user's
         // repositories which include public and private repositories.
@@ -57,47 +60,59 @@ namespace Web_Recomendaciones.Controllers
                     }
                 }
 
-                List<Repository> contributorsRepos = new List<Repository>();
-                Dictionary<String, int> contributors = new Dictionary<string, int>();
+
+                Dictionary<String, WeightedString> contributors = new Dictionary<string, WeightedString>();
                 List<RepositoryContributor> users = new List<RepositoryContributor>();
-                foreach (Repository repos in reposDict.Values)
+                foreach (Repository repo in reposDict.Values)
                 {
-                    users.AddRange(await client.Repository.GetAllContributors(repos.Owner.Login, repos.Name));
+                    users.AddRange(await client.Repository.GetAllContributors(repo.Owner.Login, repo.Name));
                     foreach(RepositoryContributor c in users)
                     {
                         if (!contributors.ContainsKey(c.Login))
                         {
-                            contributors.Add(c.Login, 1);
+                            contributors.Add(c.Login, new WeightedString(c.Login, 1));
                         }
                         else
                         {
-                            contributors[c.Login] += 1;
+                            contributors[c.Login].Weight += 1;
                         }
                     }
                 }
-                Session[VARIABLES_SESSION.LINKS] = reposDict;
 
+                List<WeightedString> sortedContributorsRepos = new List<WeightedString>(contributors.Values);
+                sortedContributorsRepos.Sort();
 
-                //var contributors = client.Repository.GetAllContributors("lidonadini", "pruebaProyecto");
-                //var a = client.Activity.
-                //string rc = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().ReposUrl;
-                /*string rc1 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().AvatarUrl;
-                int rc2 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().Contributions;
-                string rc3 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().EventsUrl;
-                string rc4 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().FollowersUrl;
-                string rc5 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().FollowingUrl;
-                string rc6 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().GistsUrl;
-                string rc7 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().HtmlUrl;
-                int rc8 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().Id;
-                string rc9 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().NodeId;
-                string rc10 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().OrganizationsUrl;
-                string rc11 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().ReceivedEventsUrl;
-                bool rc12 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().SiteAdmin;
-                string rc13 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().StarredUrl;
-                string rc14 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().SubscriptionsUrl;
-                string rc15 = contributors.Result.Where(c => c.Login == "lidonadini").FirstOrDefault().Url;*/
-                //List<RepositoryContributor> rc = contributors.Result.ToList();
-                var model = new IndexViewModel(reposDict.Values);
+                // Obtengo los repositorios pertenecientes y starred de los usuarios "similares" a mi
+                int similarUsers = 1;
+                IReadOnlyList<Repository> repos;
+                Dictionary<String, WeightedString> repoReco = new Dictionary<string, WeightedString>();
+                foreach (WeightedString user in sortedContributorsRepos)
+                {
+                    repos = await client.Repository.GetAllForUser(user.WString);
+                    foreach(Repository repo in repos)
+                    {
+                        if (!repoReco.ContainsKey(repo.FullName))
+                        {
+                            repoReco.Add(repo.FullName, new WeightedString(repo.FullName, user.Weight, repo.HtmlUrl));
+                        }
+                        else
+                        {
+                            repoReco[repo.FullName].Weight += user.Weight;
+                        }
+                    }
+
+                    if (similarUsers > MAX_SIMILAR_USERS)
+                        break;
+                    similarUsers++;
+                }
+
+                List<WeightedString> listaRepoReco = new List<WeightedString>(repoReco.Values);
+                listaRepoReco.Sort();
+
+                Session[VARIABLES_SESSION.LINKS] = listaRepoReco;
+
+                //var model = new IndexViewModel(listaRepoReco);
+                var model = new IndexViewModel();
 
                 return View(model);
             }
