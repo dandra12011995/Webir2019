@@ -9,7 +9,13 @@ namespace Web_Recomendaciones
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                        "~/Scripts/jquery-{version}.js"));
+                        "~/Scripts/jquery-{version}.js",
+                        "~/Scripts/jquery.dataTables.min.js",
+                        "~/Scripts/dataTables.bootstrap.min.js",
+                        "~/Scripts/dataTables.buttons.min.js",
+                        "~/Scripts/datatables.min.js",
+                        "~/Scripts/dataTables.responsive.min.js",
+                        "~/Scripts/dataTables.select.min.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
@@ -24,6 +30,9 @@ namespace Web_Recomendaciones
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
+                      "~/Content/buttons.dataTables.min.css",
+                      "~/Content/dataTables.bootstrap.min.css",
+                      "~/Content/datatables.min.css",
                       "~/Content/site.css"));
         }
     }

@@ -8,5 +8,6 @@ namespace Web_Recomendaciones.ViewModel
     public class TablaRecomendacionesViewModel
     {
         public string link { get; set; }
+        public string url { get; set; }
     }
 }

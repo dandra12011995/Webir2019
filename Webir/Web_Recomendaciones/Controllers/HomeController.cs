@@ -152,6 +152,7 @@ namespace Web_Recomendaciones.Controllers
                 {
                     TablaRecomendacionesViewModel l = new TablaRecomendacionesViewModel();
                     l.link = r.Value.FullName;
+                    l.url = r.Value.HtmlUrl;
                     registros.Add(l);
                 }
                 registros.Skip(valor.start).Take(valor.length).ToList();

@@ -122,6 +122,7 @@
     <Content Include="Content\js\jquery.dataTables.min.js" />
     <Content Include="Content\js\jquery.mask.js" />
     <Content Include="Content\js\jquery.mask.min.js" />
+    <Content Include="Content\js\jquery.min.js" />
     <Content Include="Content\js\jquery.slimscroll.min.js" />
     <Content Include="Content\js\jquery.sparkline.min.js" />
     <Content Include="Content\js\jquery.spzoom.js" />
