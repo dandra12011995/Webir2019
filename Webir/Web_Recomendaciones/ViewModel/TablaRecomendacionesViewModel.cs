@@ -9,5 +9,6 @@ namespace Web_Recomendaciones.ViewModel
     {
         public string link { get; set; }
         public string url { get; set; }
+        public string cant { get; set; }
     }
 }

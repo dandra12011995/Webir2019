@@ -19,6 +19,9 @@
                                 <th style="padding-top: 10px;padding-bottom: 10px;">
                                     Recomendaciones
                                 </th>
+                                <th style="padding-top: 10px;padding-bottom: 10px;">
+                                    Cantidad
+                                </th>
                                 <th width="10px">
                                 </th>
                             </tr>
@@ -68,11 +71,13 @@
         "columns": [
             {
                 "data": "link"
+            },{
+                "data": "cant"
             },
             {
                 "data": "url",
                  render: function (data, type, row) {
-                     return '<a title="Ver" href="' + data + '"><span class="glyphicon glyphicon-log-in"></span></a>';
+                     return '<a title="Ver" href="' + data + '" target="_blank"><span class="glyphicon glyphicon-log-in"></span></a>';
                     }
             },
         ]

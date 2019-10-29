@@ -19,7 +19,7 @@ namespace Web_Recomendaciones.Controllers
         const string clientId = "6247094934e496486081";
         private const string clientSecret = "59f1ddfb05ac46f00a72df8839998871ef90bae2";
         readonly GitHubClient client =
-            new GitHubClient(new ProductHeaderValue("GitHub RepoReco"));
+            new GitHubClient(new ProductHeaderValue("Haack-GitHub-Oauth-Demo"));
 
         private const int MAX_SIMILAR_USERS = 10;
 
@@ -39,42 +39,48 @@ namespace Web_Recomendaciones.Controllers
 
             try
             {
-                // The following requests retrieves all of the user's repositories and
-                // requires that the user be logged in to work.
-                var myRepos = await client.Repository.GetAllForCurrent();
-                Dictionary<String, Repository> reposDict = new Dictionary<string, Repository>();
+                User me = (await client.User.Current());
+
+                // Mis repos
+                var myRepos = await client.Repository.GetAllForUser(me.Login);
+                Dictionary<String, Repository> myReposDict = new Dictionary<string, Repository>();
                 foreach (Repository repository in myRepos)
                 {
-                    if (!reposDict.ContainsKey(repository.FullName))
+                    if (!myReposDict.ContainsKey(repository.FullName))
                     {
-                        reposDict.Add(repository.FullName, repository);
+                        myReposDict.Add(repository.FullName, repository);
                     }
                 }
 
+                // Mis starred repos
                 var starredRepos = (await client.Activity.Starring.GetAllForCurrent());
                 foreach (Repository repository in starredRepos)
                 {
-                    if (!reposDict.ContainsKey(repository.FullName))
+                    if (!myReposDict.ContainsKey(repository.FullName))
                     {
-                        reposDict.Add(repository.FullName, repository);
+                        myReposDict.Add(repository.FullName, repository);
                     }
                 }
 
-
                 Dictionary<String, WeightedString> contributors = new Dictionary<string, WeightedString>();
                 List<RepositoryContributor> users = new List<RepositoryContributor>();
-                foreach (Repository repo in reposDict.Values)
+                foreach (Repository repo in myReposDict.Values)
                 {
+                    users.Clear();
                     users.AddRange(await client.Repository.GetAllContributors(repo.Owner.Login, repo.Name));
                     foreach(RepositoryContributor c in users)
                     {
-                        if (!contributors.ContainsKey(c.Login))
+                        if (!c.Login.Equals(me.Login))
                         {
-                            contributors.Add(c.Login, new WeightedString(c.Login, 1));
-                        }
-                        else
-                        {
-                            contributors[c.Login].Weight += 1;
+                            if (!contributors.ContainsKey(c.Login))
+                            {
+                                contributors.Add(c.Login, new WeightedString(c.Login, 1));
+                            }
+                            else
+                            {
+                                contributors[c.Login].Weight += 1;
+                            }
+
                         }
                     }
                 }
@@ -91,13 +97,32 @@ namespace Web_Recomendaciones.Controllers
                     repos = await client.Repository.GetAllForUser(user.WString);
                     foreach(Repository repo in repos)
                     {
-                        if (!repoReco.ContainsKey(repo.FullName))
+                        if (!myReposDict.ContainsKey(repo.FullName))
                         {
-                            repoReco.Add(repo.FullName, new WeightedString(repo.FullName, user.Weight, repo.HtmlUrl));
+                            if (!repoReco.ContainsKey(repo.FullName))
+                            {
+                                repoReco.Add(repo.FullName, new WeightedString(repo.FullName, user.Weight, repo.HtmlUrl));
+                            }
+                            else
+                            {
+                                repoReco[repo.FullName].Weight += user.Weight;
+                            }
                         }
-                        else
+                    }
+
+                    repos = await client.Activity.Starring.GetAllForUser(user.WString);
+                    foreach (Repository repo in repos)
+                    {
+                        if (!myReposDict.ContainsKey(repo.FullName))
                         {
-                            repoReco[repo.FullName].Weight += user.Weight;
+                            if (!repoReco.ContainsKey(repo.FullName))
+                            {
+                                repoReco.Add(repo.FullName, new WeightedString(repo.FullName, user.Weight, repo.HtmlUrl));
+                            }
+                            else
+                            {
+                                repoReco[repo.FullName].Weight += user.Weight;
+                            }
                         }
                     }
 
@@ -159,15 +184,16 @@ namespace Web_Recomendaciones.Controllers
         public ActionResult PublicarLinks(TablaRequestViewModel valor)
         {
             List<TablaRecomendacionesViewModel> registros = new List<TablaRecomendacionesViewModel>();
-            Dictionary<String, Repository> valores = new Dictionary<string, Repository>();
+            List<WeightedString> valores = new List<WeightedString>();
             if (Session[VARIABLES_SESSION.LINKS] != null)
             {
-                valores = (Dictionary<String, Repository>)Session[VARIABLES_SESSION.LINKS];
-                foreach (KeyValuePair<String, Repository> r in valores)
+                valores = (List<WeightedString>)Session[VARIABLES_SESSION.LINKS];
+                foreach (WeightedString r in valores)
                 {
                     TablaRecomendacionesViewModel l = new TablaRecomendacionesViewModel();
-                    l.link = r.Value.FullName;
-                    l.url = r.Value.HtmlUrl;
+                    l.link = r.WString;
+                    l.url = r.Url;
+                    l.cant = r.Weight.ToString();
                     registros.Add(l);
                 }
                 registros.Skip(valor.start).Take(valor.length).ToList();
