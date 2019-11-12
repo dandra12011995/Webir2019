@@ -115,6 +115,9 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\buttons.dataTables.min.css" />
+    <Content Include="Content\dataTables.bootstrap.min.css" />
+    <Content Include="Content\datatables.min.css" />
     <Content Include="Content\js\adminlte.js" />
     <Content Include="Content\js\adminlte.min.js" />
     <Content Include="Content\js\botones_grilla\jszip.min.js" />
@@ -128,9 +131,9 @@
     <Content Include="Content\js\dataTables.select.min.js" />
     <Content Include="Content\js\jquery-migrate-3.0.0.js" />
     <Content Include="Content\js\jquery.dataTables.min.js" />
+    <Content Include="Content\js\jquery.js" />
     <Content Include="Content\js\jquery.mask.js" />
     <Content Include="Content\js\jquery.mask.min.js" />
-    <Content Include="Content\js\jquery.min.js" />
     <Content Include="Content\js\jquery.slimscroll.min.js" />
     <Content Include="Content\js\jquery.sparkline.min.js" />
     <Content Include="Content\js\jquery.spzoom.js" />
@@ -213,7 +216,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>49371</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:49371/Home/Index</IISUrl>
+          <IISUrl>http://localhost:49371/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

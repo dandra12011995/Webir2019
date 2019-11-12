@@ -10,12 +10,15 @@ namespace Web_Recomendaciones
 {
     public class MvcApplication : System.Web.HttpApplication
     {
+        private static System.Timers.Timer aTimer;
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            
         }
     }
 }

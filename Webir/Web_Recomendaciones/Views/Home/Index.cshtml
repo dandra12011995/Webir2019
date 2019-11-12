@@ -1,4 +1,6 @@
-﻿@model Web_Recomendaciones.ViewModel.IndexViewModel
+﻿<@Page Async="true" >
+
+@model Web_Recomendaciones.ViewModel.IndexViewModel
 @{
     ViewBag.Title = "Repositorios";
 }
@@ -33,11 +35,28 @@
     </div>
 </div>
 
-<div id="dialog-error" title="Error" style="display:none;">
-    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:10px 10px 20px 0;"></span><div id="textoDialogo"></div></p>
-</div>
 
 <script>
+
+    function obtenerDatos() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("BuscarRepositorios", "Home")',
+            data:
+            {
+            },
+            beforeSend: function () {
+            },
+            success: function (result) {
+                if (result == 'Error') {
+                }
+                else {
+                    $('#dtDatos').DataTable().draw();
+                }
+            },
+        });
+    }
+    setInterval(obtenerDatos, 20000000);
 
     $('#dtDatos').DataTable({
         stateSave: true,
@@ -82,20 +101,9 @@
             },
         ]
     });
-    
+
     $('#dtDatos').on('draw.dt', function () {
         $('[data-toggle="tooltip"]').tooltip();
     });
 
-    $("#dialog-error").dialog({
-        resizable: false,
-        width: 500,
-        modal: true,
-        autoOpen: false,
-        buttons: {
-            "Cerrar": function () {
-                $(this).dialog("close");
-            }
-        }
-    });
 </script>

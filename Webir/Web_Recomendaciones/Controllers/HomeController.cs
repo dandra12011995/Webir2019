@@ -9,6 +9,7 @@ using System.Web.Security;
 using Web_Recomendaciones.ViewModel;
 using Web_Recomendaciones.Content;
 using static Web_Recomendaciones.ViewModel.Constantes;
+using System.Timers;
 
 namespace Web_Recomendaciones.Controllers
 {
@@ -25,7 +26,7 @@ namespace Web_Recomendaciones.Controllers
 
         // This URL uses the GitHub API to get a list of the current user's
         // repositories which include public and private repositories.
-        
+
         // GET: Home
         public async Task<ActionResult> Index()
         {
@@ -68,7 +69,7 @@ namespace Web_Recomendaciones.Controllers
                 {
                     users.Clear();
                     users.AddRange(await client.Repository.GetAllContributors(repo.Owner.Login, repo.Name));
-                    foreach(RepositoryContributor c in users)
+                    foreach (RepositoryContributor c in users)
                     {
                         if (!c.Login.Equals(me.Login))
                         {
@@ -95,7 +96,7 @@ namespace Web_Recomendaciones.Controllers
                 foreach (WeightedString user in sortedContributorsRepos)
                 {
                     repos = await client.Repository.GetAllForUser(user.WString);
-                    foreach(Repository repo in repos)
+                    foreach (Repository repo in repos)
                     {
                         if (!myReposDict.ContainsKey(repo.FullName))
                         {
@@ -140,6 +141,120 @@ namespace Web_Recomendaciones.Controllers
                 var model = new IndexViewModel();
 
                 return View(model);
+            }
+            catch (AuthorizationException)
+            {
+                // Either the accessToken is null or it's invalid. This redirects
+                // to the GitHub OAuth login page. That page will redirect back to the
+                // Authorize action.
+                return Redirect(GetOauthLoginUrl());
+            }
+        }
+        public void BuscarRepositorios()
+        {
+            new Task(() => { GetDatos(); }).Start();
+        }
+        public async Task<ActionResult> GetDatos()
+        {
+            try
+            {
+                User me = (await client.User.Current());
+
+                // Mis repos
+                var myRepos = await client.Repository.GetAllForUser(me.Login);
+                Dictionary<String, Repository> myReposDict = new Dictionary<string, Repository>();
+                foreach (Repository repository in myRepos)
+                {
+                    if (!myReposDict.ContainsKey(repository.FullName))
+                    {
+                        myReposDict.Add(repository.FullName, repository);
+                    }
+                }
+
+                // Mis starred repos
+                var starredRepos = (await client.Activity.Starring.GetAllForCurrent());
+                foreach (Repository repository in starredRepos)
+                {
+                    if (!myReposDict.ContainsKey(repository.FullName))
+                    {
+                        myReposDict.Add(repository.FullName, repository);
+                    }
+                }
+
+                Dictionary<String, WeightedString> contributors = new Dictionary<string, WeightedString>();
+                List<RepositoryContributor> users = new List<RepositoryContributor>();
+                foreach (Repository repo in myReposDict.Values)
+                {
+                    users.Clear();
+                    users.AddRange(await client.Repository.GetAllContributors(repo.Owner.Login, repo.Name));
+                    foreach (RepositoryContributor c in users)
+                    {
+                        if (!c.Login.Equals(me.Login))
+                        {
+                            if (!contributors.ContainsKey(c.Login))
+                            {
+                                contributors.Add(c.Login, new WeightedString(c.Login, 1));
+                            }
+                            else
+                            {
+                                contributors[c.Login].Weight += 1;
+                            }
+
+                        }
+                    }
+                }
+
+                List<WeightedString> sortedContributorsRepos = new List<WeightedString>(contributors.Values);
+                sortedContributorsRepos.Sort();
+
+                // Obtengo los repositorios pertenecientes y starred de los usuarios "similares" a mi
+                int similarUsers = 1;
+                IReadOnlyList<Repository> repos;
+                Dictionary<String, WeightedString> repoReco = new Dictionary<string, WeightedString>();
+                foreach (WeightedString user in sortedContributorsRepos)
+                {
+                    repos = await client.Repository.GetAllForUser(user.WString);
+                    foreach (Repository repo in repos)
+                    {
+                        if (!myReposDict.ContainsKey(repo.FullName))
+                        {
+                            if (!repoReco.ContainsKey(repo.FullName))
+                            {
+                                repoReco.Add(repo.FullName, new WeightedString(repo.FullName, user.Weight, repo.HtmlUrl));
+                            }
+                            else
+                            {
+                                repoReco[repo.FullName].Weight += user.Weight;
+                            }
+                        }
+                    }
+
+                    repos = await client.Activity.Starring.GetAllForUser(user.WString);
+                    foreach (Repository repo in repos)
+                    {
+                        if (!myReposDict.ContainsKey(repo.FullName))
+                        {
+                            if (!repoReco.ContainsKey(repo.FullName))
+                            {
+                                repoReco.Add(repo.FullName, new WeightedString(repo.FullName, user.Weight, repo.HtmlUrl));
+                            }
+                            else
+                            {
+                                repoReco[repo.FullName].Weight += user.Weight;
+                            }
+                        }
+                    }
+
+                    if (similarUsers > MAX_SIMILAR_USERS)
+                        break;
+                    similarUsers++;
+                }
+
+                List<WeightedString> listaRepoReco = new List<WeightedString>(repoReco.Values);
+                listaRepoReco.Sort();
+
+                Session[VARIABLES_SESSION.LINKS] = listaRepoReco;
+                return Json(new { });
             }
             catch (AuthorizationException)
             {
