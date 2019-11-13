@@ -27,6 +27,12 @@ namespace Web_Recomendaciones.Controllers
         // This URL uses the GitHub API to get a list of the current user's
         // repositories which include public and private repositories.
 
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+
         // GET: Home
         public async Task<ActionResult> Index()
         {
@@ -265,7 +271,12 @@ namespace Web_Recomendaciones.Controllers
             }
         }
 
-        private string GetOauthLoginUrl()
+        public ActionResult RedirigirUsuario()
+        {
+            return Json(new { path = GetOauthLoginUrl() });
+        }
+
+        public string GetOauthLoginUrl()
         {
             string csrf = Membership.GeneratePassword(24, 1);
             Session["CSRF:State"] = csrf;
@@ -311,14 +322,13 @@ namespace Web_Recomendaciones.Controllers
                     l.cant = r.Weight.ToString();
                     registros.Add(l);
                 }
-                registros.Skip(valor.start).Take(valor.length).ToList();
             }
             return Json(new
             {
                 draw = valor.draw,
                 recordsTotal = registros.Count,
                 recordsFiltered = registros.Count,
-                data = registros
+                data = registros.Skip(valor.start).Take(valor.length).ToList()
             }, JsonRequestBehavior.AllowGet);
         }
     }

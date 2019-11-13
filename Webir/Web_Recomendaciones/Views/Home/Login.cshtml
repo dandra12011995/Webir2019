@@ -1,0 +1,49 @@
+﻿<div style="margin-top: 10%; margin-left:30%">
+    <h1>Iniciar sesión en RECOREPO</h1>
+</div>
+
+<div class="panel panel-default" style="margin-top: 0%;margin-bottom: 10%;">
+    <div class="panel-body" style="padding-bottom: 20px;padding-top: 20px;">
+        <div class="container">
+            <div class="form-group row" style="margin-bottom: 0px;">
+                <div class="col-xs-12">
+                    <div class="btn btn-small" style="margin-left:40%"><input type="button" id="btnIniciar" value="Iniciar con GitHub" class="btn_accion boton_personalizado" /></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style type="text/css">
+    .boton_personalizado {
+        text-decoration: none;
+        padding: 10px;
+        font-weight: 600;
+        font-size: 20px;
+        color: white;
+        background-color: black;
+    }
+</style>
+
+<script>
+    $("#btnIniciar").click(function () {
+        refirigirUsuario();
+    });
+
+    function refirigirUsuario() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RedirigirUsuario", "Home")',
+            data:
+            {
+            },
+            success: function (result) {
+                if (result == 'Error') {
+                }
+                else {
+                    window.location.href=result.path;
+                }
+            },
+        });
+    }
+</script>
